@@ -1,43 +1,99 @@
-360° Multi-Modal Velocity Fusion for Autonomous Vehicles
-📌 Project Overview
-This project implements a high-performance Mid-Fusion Neural Network designed to predict vehicle velocity by integrating data from a 360° surround-view camera suite (6 cameras) and LiDAR Bird's Eye View (BEV).
-Unlike single-sensor systems, this model performs spatial synchronization across 7 asynchronous sensors to build a comprehensive "world model," enabling accurate ego-motion estimation even in complex urban environments.
-🚀 Key Features
-•	Surround-View Perception: Processes 6 simultaneous camera feeds (Front, Front-Left, Front-Right, Back, Back-Left, Back-Right) using a shared ResNet-18 backbone.
-•	LiDAR Voxelization: Transforms raw .bin point clouds into 2-channel BEV maps (Height and Density) using vectorized NumPy operations for sub-millisecond preprocessing.
-•	Feature-Level Fusion: Implements a mid-fusion architecture that concatenates semantic visual features with geometric LiDAR data.
-•	Real-Time Dashboard: Includes a "Command Center" visualization suite that stitches sensor data into a 360° HUD.
-🛠 Tech Stack
-•	Framework: PyTorch, TorchVision
-•	Data Handling: NuScenes SDK, NumPy, PIL
-•	Visualization: OpenCV, Matplotlib
-•	Optimization: Huber Loss (Robust to outliers in velocity ground truth)
-📊 Model Architecture
-The model consists of two main branches:
-1.	Vision Branch: A Time-Distributed ResNet-18 encoder that extracts a 512-dimensional feature vector from each of the 6 cameras.
-2.	LiDAR Branch: A 2D Convolutional network that processes the BEV grid to extract spatial occupancy features.
-3.	Regressor: A fully connected head that maps the 3,104 combined features to a scalar velocity (m/s).
-🚦 Results & Visualization
-The model successfully converges using Huber Loss, demonstrating robust performance against noisy LiDAR returns.
-Surround-View Perception	LiDAR BEV Mapping
-	
-Export to Sheets
-(Note: Replace the placeholders above with links to your actual exported images/videos in your GitHub repo)
-📂 Project Structure
-Plaintext
+# 360° Multi-Modal Velocity Fusion for Autonomous Vehicles
+
+A high-performance **mid-fusion neural network** for ego-vehicle velocity estimation using **360° surround-view cameras** and **LiDAR Bird’s Eye View (BEV)** representations.  
+This project demonstrates robust sensor fusion, real-time preprocessing, and scalable perception design inspired by modern autonomous driving stacks.
+
+---
+
+## 📌 Project Overview
+
+This system predicts vehicle velocity (m/s) by fusing data from **7 asynchronous sensors**:
+- **6 surround-view RGB cameras**
+- **1 LiDAR sensor projected into BEV space**
+
+Unlike single-sensor approaches, the model performs **feature-level (mid) fusion**, enabling accurate ego-motion estimation even under occlusions, sparse LiDAR returns, and complex urban dynamics.
+
+The pipeline is built on **nuScenes-mini** and optimized for **real-time preprocessing and inference**.
+
+---
+
+## 🚀 Key Features
+
+- **360° Surround-View Perception**
+  - Six camera feeds: Front, Front-Left, Front-Right, Back, Back-Left, Back-Right
+  - Shared **ResNet-18** backbone with time-distributed encoding
+
+- **LiDAR BEV Voxelization**
+  - Raw `.bin` point clouds converted into **2-channel BEV maps**
+    - Height Map
+    - Density Map
+  - Fully vectorized NumPy implementation for sub-millisecond preprocessing
+
+- **Mid-Level Feature Fusion**
+  - Concatenates semantic visual features with geometric LiDAR representations
+  - Preserves spatial context while remaining computationally efficient
+
+- **Real-Time Command Center Dashboard**
+  - 360° stitched camera HUD
+  - BEV LiDAR visualization
+  - Velocity prediction overlay
+
+---
+
+## 🛠 Tech Stack
+
+| Component        | Tools / Libraries |
+|------------------|------------------|
+| Framework        | PyTorch, TorchVision |
+| Dataset          | nuScenes SDK (mini) |
+| Data Processing  | NumPy, PIL |
+| Visualization    | OpenCV, Matplotlib |
+| Optimization     | Huber Loss |
+
+---
+
+## 🧠 Model Architecture
+
+The network consists of three main components:
+
+### 1️⃣ Vision Branch
+- Shared **ResNet-18** encoder
+- Processes each camera independently
+- Outputs **512-dim feature vectors × 6 cameras**
+
+### 2️⃣ LiDAR Branch
+- 2D CNN over BEV grid
+- Learns spatial occupancy and structure
+- Outputs a **32 × H × W** feature embedding
+
+### 3️⃣ Fusion & Regression Head
+- Feature concatenation (Vision + LiDAR)
+- **3,104-dimensional fused representation**
+- Fully connected regressor
+- Outputs **scalar ego-velocity (m/s)**
+
+---
+
+## 📊 Results & Visualization
+
+- Stable convergence using **Huber Loss**
+- Robust to:
+  - Noisy LiDAR returns
+  - Ego-pose drift in nuScenes metadata
+  - High-acceleration frames
+
+
+
+---
+
+## 📂 Project Structure
+
+```plaintext
 ├── data/                  # nuScenes-mini dataset
 ├── notebooks/
-│   └── fusion_main.ipynb  # Core training and inference logic
+│   └── fusion_main.ipynb  # Training and inference pipeline
 ├── models/
 │   └── kodiak_fusion.pth  # Trained model weights
-├── outputs/               # Saved visualizations and HUD videos
+├── outputs/               # Visualizations and HUD recordings
+├── requirements.txt
 └── README.md
-🧠 Engineering Highlights (The "Kodiak" Edge)
-•	Spatial Synchronization: Handled extrinsic calibration offsets to ensure objects passing between camera fields-of-view maintained feature consistency.
-•	Latency Optimization: Replaced iterative Python loops with vectorized np.maximum.at operations for LiDAR projection, reducing data-loading bottlenecks by 10x.
-•	Robustness: Utilized Huber Loss to mitigate the impact of ego-pose drift in the nuScenes metadata during high-acceleration frames.
-🛠 Installation & Usage
-1.	Clone the repo: git clone https://github.com/your-username/av-velocity-fusion.git
-2.	Install dependencies: pip install -r requirements.txt
-3.	Download nuScenes-mini and place it in the data/ folder.
-4.	Run the training notebook or the inference script to generate the dashboard.
